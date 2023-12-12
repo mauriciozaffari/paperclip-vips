@@ -8,8 +8,8 @@ module Paperclip
 
       geometry = options[:geometry].to_s
       @should_crop = geometry[-1,1] == '#'
-      @target_geometry = options.fetch(:string_geometry_parser, Geometry).parse(geometry)
-      @current_geometry = options.fetch(:file_geometry_parser, Geometry).from_file(@file)
+      @target_geometry = options.fetch(:string_geometry_parser, VipsGeometry).parse(geometry)
+      @current_geometry = options.fetch(:file_geometry_parser, VipsGeometry).from_file(@file)
       @whiny = options.fetch(:whiny, true)
 
       @auto_orient = options.fetch(:auto_orient, true)
@@ -31,7 +31,7 @@ module Paperclip
         thumbnail = ::Vips::Image.new_from_file(source.path) if !defined?(thumbnail) || thumbnail.nil?
         thumbnail = process_convert_options(thumbnail)
         save_thumbnail(thumbnail, destination.path)
-        
+
       rescue => e
         if @whiny
           message = "There was an error processing the thumbnail for #{@basename}:\n" + e.message
@@ -68,7 +68,7 @@ module Paperclip
       def height
         @target_geometry&.height || @current_geometry.height
       end
-      
+
       def process_convert_options(image)
         if image
           commands = parsed_convert_commands(@convert_options)
